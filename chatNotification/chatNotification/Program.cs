@@ -3,6 +3,7 @@ using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using PuppeteerSharp;
+using PuppeteerSharp.Media;
 
 class Program
 {
@@ -35,19 +36,33 @@ class Program
 
                 // Opóźnienie wykonania zrzutu ekranu o 10 sekund
                 Console.WriteLine("Oczekiwanie na screen...");
-                await Task.Delay(15000);
+                await Task.Delay(30000);
 
+                // Ustal wysokość całkowitą części strony
+                var pageHeight = await strona.EvaluateExpressionAsync<int>("document.documentElement.scrollHeight");
 
-                var zrzutEkranuOpcje = new ScreenshotOptions
+                // Ustaw rozmiar widoku przeglądarki na większą szerokość dla zrzutu ekranu
+                await strona.SetViewportAsync(new ViewPortOptions
                 {
-                    FullPage = true
-                };
+                    Width = 1920, // Zwiększ rozdzielczość szerokości
+                    Height = pageHeight / 2
+                });
 
-                await strona.ScreenshotAsync(sciezkaZrzutu, zrzutEkranuOpcje);
+                // Przewiń stronę do przesunięcia od góry (np. 200 pikseli)
+                await strona.EvaluateExpressionAsync("window.scrollTo(0, 200)");
+
+                await Task.Delay(2000); // Dodatkowe opóźnienie przed wykonaniem zrzutu ekranu
+
+
+                // Zrób zrzut ekranu górnej części strony
+                await strona.ScreenshotAsync(sciezkaZrzutu);
             }
 
             Console.WriteLine("Zrzut ekranu został zapisany.");
         }
+
+
+
 
 
 
@@ -79,7 +94,7 @@ class Program
                 {
                     var chatMessage = new
                     {
-                        text = $"WYCIEK R410!!: {imageUrl}"
+                        text = $"Finalna wersja udało się zwiększyć rozdzielczość! i ustawić w konkretnym miejscu dashborda {imageUrl}"
                     };
 
                     var json = Newtonsoft.Json.JsonConvert.SerializeObject(chatMessage);
